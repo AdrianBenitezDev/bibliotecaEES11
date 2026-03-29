@@ -456,6 +456,29 @@ a {
   gap: 0.9rem;
 }
 
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.contact-card {
+  text-align: center;
+}
+
+.contact-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f4f82;
+  background: #e5f0fc;
+  border: 1px solid #bdd2e7;
+  margin-bottom: 0.55rem;
+}
+
 .library-card {
   display: flex;
   align-items: center;
