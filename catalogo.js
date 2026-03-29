@@ -1,0 +1,55 @@
+window.catalogoBiblioteca = [
+  {
+    titulo: "El matadero",
+    autor: "Esteban Echeverria",
+    categoria: "Literatura argentina",
+    descripcion: "Texto clasico para trabajar narrativa, contexto historico y debates de epoca.",
+    enlace: "https://www.educ.ar/recursos",
+  },
+  {
+    titulo: "Martin Fierro",
+    autor: "Jose Hernandez",
+    categoria: "Literatura gauchesca",
+    descripcion: "Obra fundamental para analizar identidad nacional, lenguaje poetico y tradicion oral.",
+    enlace: "https://www.argentina.gob.ar/educacion",
+  },
+  {
+    titulo: "Introduccion a la biologia celular",
+    autor: "Equipo de Ciencias Naturales",
+    categoria: "Biologia",
+    descripcion: "Material de apoyo sobre estructuras celulares, funciones vitales y metodo cientifico.",
+  },
+  {
+    titulo: "Historia argentina 1810-1916",
+    autor: "Felipe Pigna",
+    categoria: "Historia",
+    descripcion: "Recorrido por procesos politicos y sociales claves del siglo XIX y comienzos del XX.",
+    enlace: "https://www.conectarigualdad.edu.ar/",
+  },
+  {
+    titulo: "Matematica en contexto",
+    autor: "Adriana Diaz",
+    categoria: "Matematica",
+    descripcion: "Ejercicios de proporcionalidad, funciones y estadistica aplicados a situaciones cotidianas.",
+  },
+  {
+    titulo: "Ciudadania digital para estudiantes",
+    autor: "Programa Conectar",
+    categoria: "Tecnologia",
+    descripcion: "Guia para trabajar convivencia digital, privacidad, fuentes confiables y huella en linea.",
+    enlace: "https://www.argentina.gob.ar/educacion/plan-nacional-integral-de-educacion-digital",
+  },
+  {
+    titulo: "Poemas reunidos",
+    autor: "Alfonsina Storni",
+    categoria: "Poesia",
+    descripcion: "Seleccion de poemas para lectura critica, recursos literarios y produccion escrita.",
+  },
+  {
+    titulo: "Atlas geografia de la Argentina",
+    autor: "Instituto Geografico Nacional",
+    categoria: "Geografia",
+    descripcion: "Mapas fisicos y politicos para trabajar regiones, relieve, economia y poblacion.",
+    enlace: "https://www.ign.gob.ar/",
+  },
+];

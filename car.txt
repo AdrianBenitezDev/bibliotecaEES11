@@ -1,0 +1,250 @@
+Quiero que construyas una landing page completa, moderna y responsive para la Escuela Secundaria N° 11 de Alejandro Korn.
+
+STACK:
+- HTML, CSS y JavaScript vanilla
+- Sin frameworks
+- Sin backend
+- Proyecto dividido en:
+  - index.html
+  - styles.css
+  - app.js
+  - catalogo.js
+- Todo debe funcionar como sitio estático
+- Se permite usar librerías por CDN (por ejemplo PapaParse y Font Awesome)
+
+FUENTES DE DATOS:
+La web debe consumir 2 hojas distintas del mismo Google Sheet, cada una como CSV independiente.
+
+URL CSV HOJA PRINCIPAL:
+https://docs.google.com/spreadsheets/d/e/2PACX-1vQrEioDH380tYWFuP8n5SbwmR5Unna2_VihZoXnnGGy_EJkLqXayze7minaMa-RxsN0itoEEjuVD4eM/pub?output=csv&gid=0
+
+URL CSV HOJA CONTINUIDAD:
+https://docs.google.com/spreadsheets/d/e/2PACX-1vQrEioDH380tYWFuP8n5SbwmR5Unna2_VihZoXnnGGy_EJkLqXayze7minaMa-RxsN0itoEEjuVD4eM/pub?output=csv&gid=246571625
+
+IMPORTANTE:
+- No mezclar las dos fuentes.
+- Tratar cada hoja como dataset separado.
+- La primera hoja contiene links a Classroom.
+- La segunda hoja, llamada "continuidad", contiene links a carpetas de Drive.
+- Las URLs deben quedar como constantes fáciles de editar dentro de app.js.
+
+ESTRUCTURA DE LA HOJA 1 (PRINCIPAL):
+Columnas exactas:
+- curso
+- sección
+- materia
+- link classroom
+- codigo del classroom
+
+ESTRUCTURA DE LA HOJA 2 (CONTINUIDAD):
+Columnas exactas:
+- curso
+- sección
+- materia
+- link drive
+
+OBJETIVO GENERAL:
+Construir una landing escolar donde:
+1. Se muestren botones únicos por combinación de curso + sección.
+2. Al hacer click en un curso/sección:
+   - se renderice una sección "Classroom"
+   - se renderice una sección "Continuidad pedagógica"
+3. En cada sección se muestren cards o botones por materia.
+4. Cada materia abra su URL correspondiente en una nueva pestaña.
+5. En la parte superior haya un buscador que busque dentro de un archivo local catalogo.js.
+6. Haya accesos fijos a Biblioteca Nacional y Biblioteca del Maestro.
+7. Haya banner, footer, iconos y diseño moderno y responsive.
+
+COMPORTAMIENTO DE DATOS:
+- Consumir ambos CSV con fetch
+- Parsearlos en el navegador con PapaParse por CDN
+- Normalizar nombres de columnas para evitar problemas con espacios, mayúsculas o tildes
+- Crear botones únicos por combinación:
+  - curso + sección
+- Ejemplos:
+  - 1ro 1ra
+  - 1ro 2da
+  - 2do 1ra
+
+REGLAS DE RENDERIZADO:
+- Si hay varias filas con mismo curso + sección, solo renderizar un botón por esa combinación.
+- Al clickear un curso/sección:
+  - mostrar visualmente el curso seleccionado
+  - mostrar contador de resultados
+  - renderizar dos bloques separados:
+    A) Classroom
+    B) Continuidad pedagógica
+
+BLOQUE A: CLASSROOM
+- Tomar datos solo de la hoja principal
+- Filtrar por curso y sección seleccionados
+- Renderizar una card por fila coincidente
+- Cada card debe mostrar:
+  - materia
+  - curso
+  - sección
+  - botón "Abrir Classroom"
+- El botón debe abrir el valor de la columna "link classroom"
+- Si "link classroom" está vacío pero existe "codigo del classroom", construir una URL fallback así:
+  https://classroom.google.com/c/[CODIGO]
+- Si ambos están vacíos, mostrar estado deshabilitado o texto "sin enlace disponible"
+
+BLOQUE B: CONTINUIDAD PEDAGÓGICA
+- Tomar datos solo de la hoja "continuidad"
+- Filtrar por curso y sección seleccionados
+- Renderizar una card por fila coincidente
+- Cada card debe mostrar:
+  - materia
+  - curso
+  - sección
+  - botón "Abrir carpeta"
+- El botón debe abrir el valor de la columna "link drive"
+- Si falta el enlace, mostrar estado deshabilitado
+
+BUSCADOR SUPERIOR:
+En la parte superior de la web debe existir un panel de búsqueda que NO busque en los CSV.
+Debe buscar dentro de un archivo local llamado catalogo.js.
+
+REQUISITO DE catalogo.js:
+Crear un archivo local de prueba llamado catalogo.js que contenga un array de objetos de ejemplo.
+Cada objeto puede tener:
+- titulo
+- autor
+- categoria
+- descripcion
+- enlace (opcional)
+
+FUNCIONAMIENTO DEL BUSCADOR:
+- Buscar por coincidencia parcial
+- Buscar dentro de:
+  - titulo
+  - autor
+  - categoria
+  - descripcion
+- Mostrar resultados debajo del input
+- Renderizar cards de resultados
+- Si no hay coincidencias, mostrar un mensaje amigable
+
+SECCIONES DE LA WEB:
+
+1) HEADER / NAV
+- Nombre de la escuela
+- Logo o ícono institucional
+- Menú con anclas:
+  - Inicio
+  - Cursos
+  - Biblioteca
+  - Buscador
+  - Contacto
+
+2) HERO / BANNER
+- Título grande:
+  "Escuela Secundaria N° 11 de Alejandro Korn"
+- Subtítulo descriptivo
+- Texto institucional breve
+- Botones CTA:
+  - Ver cursos
+  - Ver biblioteca
+
+3) PANEL DE BÚSQUEDA
+- Input de búsqueda
+- Botón buscar
+- Resultados del archivo catalogo.js
+
+4) PANEL DE CURSOS
+- Botones únicos por curso + sección
+- Deben verse como categorías grandes
+- Con iconos
+- Deben resaltar el activo
+
+5) RESULTADOS DEL CURSO SELECCIONADO
+- Texto visible con el curso seleccionado
+- Contador de materias/enlaces encontrados
+- Dos secciones separadas:
+  - Classroom
+  - Continuidad pedagógica
+
+6) BIBLIOTECA Y RECURSOS
+Agregar botones/cards fijos con estos accesos:
+- Biblioteca Nacional
+- Biblioteca Nacional de Maestros / Biblioteca del Maestro
+
+Dejar los links en constantes fáciles de editar en app.js.
+
+7) FOOTER
+- Nombre de la escuela
+- Texto institucional breve
+- Enlaces rápidos
+- Recursos bibliotecarios
+- Año actual dinámico
+
+ESTILO VISUAL:
+- Responsive para PC y celular
+- Diseño limpio, prolijo, institucional y moderno
+- Buena tipografía
+- Botones con hover
+- Cards con sombra suave
+- Bordes redondeados
+- Animaciones suaves de aparición
+- Iconos con Font Awesome por CDN
+- Muy buena usabilidad móvil
+- No usar colores estridentes
+- Paleta sobria escolar
+
+REQUISITOS TÉCNICOS:
+- Código claro y mantenible
+- Separar lógica en funciones
+- Manejar errores de fetch y parseo
+- Mostrar mensaje si un CSV no carga
+- Mostrar mensajes vacíos si no hay resultados
+- Sanitizar textos al renderizar
+- No hardcodear cursos ni materias
+- Todo el contenido principal debe salir de los CSV
+- Solo catalogo.js puede tener datos de prueba
+
+FUNCIONES SUGERIDAS:
+- cargarCSV(url)
+- normalizarColumnas(filas)
+- obtenerCursosSeccionesUnicos(classroomData, continuidadData)
+- renderBotonesCursos(cursos)
+- seleccionarCursoSeccion(curso, seccion)
+- renderBloqueClassroom(curso, seccion)
+- renderBloqueContinuidad(curso, seccion)
+- inicializarBuscadorCatalogo()
+- renderResultadosCatalogo(resultados)
+- mostrarEstadoVacio()
+- mostrarErrorCarga()
+
+REGLAS IMPORTANTES:
+- Un curso/sección puede existir en una hoja y no en la otra.
+- El sistema debe seguir funcionando igual.
+- Si en Classroom no hay materias para ese curso/sección, mostrar:
+  "No hay aulas disponibles para este curso."
+- Si en Continuidad no hay materias, mostrar:
+  "No hay carpetas de continuidad disponibles para este curso."
+- No romper la interfaz si faltan filas o columnas vacías.
+
+ENTREGABLE:
+Generar completos y listos para usar:
+- index.html
+- styles.css
+- app.js
+- catalogo.js
+
+Además:
+- comentar las partes importantes
+- dejar el proyecto listo para abrir localmente
+- no usar npm
+- no usar build tools
+- todo por CDN o JS puro
+
+EXTRA:
+- Agregar una pequeña transición al cambiar de curso
+- Agregar un estado inicial:
+  "Seleccioná un curso para ver sus aulas y materiales"
+- Agregar iconos distintos para:
+  - cursos
+  - classroom
+  - continuidad
+  - biblioteca
+  - búsqueda
