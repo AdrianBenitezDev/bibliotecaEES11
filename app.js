@@ -1,15 +1,11 @@
 const CSV_URL_PRINCIPAL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQrEioDH380tYWFuP8n5SbwmR5Unna2_VihZoXnnGGy_EJkLqXayze7minaMa-RxsN0itoEEjuVD4eM/pub?output=csv&gid=0";
-const CSV_URL_CONTINUIDAD =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQrEioDH380tYWFuP8n5SbwmR5Unna2_VihZoXnnGGy_EJkLqXayze7minaMa-RxsN0itoEEjuVD4eM/pub?output=csv&gid=246571625";
 
 const BIBLIOTECA_NACIONAL_URL = "https://www.bn.gob.ar/";
 const BIBLIOTECA_DEL_MAESTRO_URL = "https://www.argentina.gob.ar/educacion/bnm";
 const DEFAULT_SECTION_VIEW = "cursos";
-const INITIAL_CLASSROOM_MESSAGE =
-  "Seleccioná un curso para cargar las materias con aulas virtuales.";
-const INITIAL_CONTINUIDAD_MESSAGE =
-  "Seleccioná un curso para cargar las carpetas de continuidad pedagógica.";
+const INITIAL_MATERIAS_MESSAGE =
+  "Selecciona un curso para cargar sus materias y enlaces disponibles.";
 
 const PLACEHOLDER_VALUES = new Set([
   "",
@@ -45,12 +41,21 @@ const ALIAS_COLUMNAS = {
     "codigoclassroom",
     "codigo",
   ],
-  linkDrive: ["link drive", "linkdrive", "drive", "carpeta drive", "link carpeta"],
+  linkContinuidad: [
+    "link continuidad pedagogica",
+    "link continuidad",
+    "continuidad pedagogica",
+    "link de continuidad",
+    "link drive",
+    "linkdrive",
+    "drive",
+    "carpeta drive",
+    "link carpeta",
+  ],
 };
 
 const state = {
-  classroomData: [],
-  continuidadData: [],
+  materiasData: [],
   cursos: [],
   selected: null,
   updateTimer: null,
@@ -65,47 +70,32 @@ document.addEventListener("DOMContentLoaded", () => {
   inicializarVistaSecciones();
   inicializarBuscadorCatalogo();
   mostrarEstadoVacio();
-  restaurarBloquesIniciales();
+  restaurarBloqueInicial();
   inicializarDatos();
 });
 
 async function inicializarDatos() {
   setStatus("Cargando cursos y materias...", "warn");
 
-  const [principalResult, continuidadResult] = await Promise.allSettled([
-    cargarCSV(CSV_URL_PRINCIPAL),
-    cargarCSV(CSV_URL_CONTINUIDAD),
-  ]);
-
-  const errores = [];
-
-  if (principalResult.status === "fulfilled") {
-    state.classroomData = normalizarColumnas(principalResult.value);
-  } else {
-    state.classroomData = [];
-    errores.push("No se pudo cargar la hoja principal (Classroom).");
-  }
-
-  if (continuidadResult.status === "fulfilled") {
-    state.continuidadData = normalizarColumnas(continuidadResult.value);
-  } else {
-    state.continuidadData = [];
-    errores.push("No se pudo cargar la hoja de continuidad pedagógica.");
-  }
-
-  state.cursos = obtenerCursosSeccionesUnicos(state.classroomData, state.continuidadData);
-  renderBotonesCursos(state.cursos);
-
-  if (errores.length === 2) {
-    mostrarErrorCarga(`${errores.join(" ")} Revisá conexión o permisos del CSV.`);
+  try {
+    const filas = await cargarCSV(CSV_URL_PRINCIPAL);
+    state.materiasData = normalizarColumnas(filas);
+  } catch (_error) {
+    state.materiasData = [];
+    renderBotonesCursos([]);
+    mostrarErrorCarga("No se pudo cargar la hoja principal. Revisa conexion o permisos del CSV.");
     return;
   }
 
-  if (errores.length === 1) {
-    setStatus(`${errores[0]} El sitio seguirá funcionando con la otra fuente.`, "warn");
-  } else {
-    setStatus(`Datos cargados correctamente. ${state.cursos.length} cursos disponibles.`, "ok");
+  state.cursos = obtenerCursosSeccionesUnicos(state.materiasData);
+  renderBotonesCursos(state.cursos);
+
+  if (!state.cursos.length) {
+    setStatus("La hoja principal cargo, pero no hay cursos validos para mostrar.", "warn");
+    return;
   }
+
+  setStatus(`Datos cargados correctamente. ${state.cursos.length} cursos disponibles.`, "ok");
 }
 
 async function cargarCSV(url) {
@@ -137,7 +127,7 @@ async function cargarCSV(url) {
 }
 
 function normalizarColumnas(filas) {
-  // Se normalizan encabezados para tolerar tildes, mayúsculas y espacios.
+  // Se normalizan encabezados para tolerar tildes, mayusculas y espacios.
   return filas
     .map((fila) => {
       const filaNormalizada = {};
@@ -155,7 +145,7 @@ function normalizarColumnas(filas) {
         materia: extraerCampo(filaNormalizada, ALIAS_COLUMNAS.materia),
         linkClassroom: extraerCampo(filaNormalizada, ALIAS_COLUMNAS.linkClassroom),
         codigoClassroom: extraerCampo(filaNormalizada, ALIAS_COLUMNAS.codigoClassroom),
-        linkDrive: extraerCampo(filaNormalizada, ALIAS_COLUMNAS.linkDrive),
+        linkContinuidad: extraerCampo(filaNormalizada, ALIAS_COLUMNAS.linkContinuidad),
       };
     })
     .filter((fila) =>
@@ -174,11 +164,10 @@ function extraerCampo(filaNormalizada, alias) {
   return "";
 }
 
-function obtenerCursosSeccionesUnicos(classroomData, continuidadData) {
+function obtenerCursosSeccionesUnicos(data) {
   const mapaUnicos = new Map();
-  const fusion = [...classroomData, ...continuidadData];
 
-  for (const fila of fusion) {
+  for (const fila of data) {
     const curso = limpiarTexto(fila.curso);
     const seccion = limpiarTexto(fila.seccion);
     if (!curso || !seccion) {
@@ -264,23 +253,17 @@ function renderBotonesCursos(cursos) {
 
 function seleccionarCursoSeccion(curso, seccion) {
   state.selected = { curso, seccion };
-
   aplicarFiltroSeccionSeleccionada(curso, seccion);
 
-  // Microtransición visual al refrescar resultados del curso seleccionado.
   dom.resultsSection.classList.add("is-updating");
   if (state.updateTimer) {
     clearTimeout(state.updateTimer);
   }
 
   state.updateTimer = window.setTimeout(() => {
-    const totalClassroom = renderBloqueClassroom(curso, seccion);
-    const totalContinuidad = renderBloqueContinuidad(curso, seccion);
-    const total = totalClassroom + totalContinuidad;
-    actualizarVisibilidadBloques(totalClassroom, totalContinuidad);
-
+    const totalMaterias = renderMateriasCurso(curso, seccion);
     dom.selectedCourseTitle.textContent = `Curso seleccionado: ${curso} ${seccion}`;
-    dom.selectedCourseCount.textContent = `Resultados: ${total} en total (${totalClassroom} Classroom y ${totalContinuidad} Continuidad).`;
+    dom.selectedCourseCount.textContent = `Resultados: ${totalMaterias} materias para este curso.`;
     dom.resultsSection.classList.remove("is-updating");
   }, 120);
 }
@@ -311,92 +294,39 @@ function limpiarSeleccionCurso() {
     button.hidden = false;
   });
 
-  restaurarBloquesIniciales();
+  restaurarBloqueInicial();
   mostrarEstadoVacio();
 }
 
-function actualizarVisibilidadBloques(totalClassroom, totalContinuidad) {
-  dom.classroomBlock.hidden = totalClassroom === 0;
-  dom.continuidadBlock.hidden = totalContinuidad === 0;
-
-  if (totalClassroom === 0 && totalContinuidad === 0) {
-    dom.classroomBlock.hidden = false;
-    dom.classroomResults.textContent = "";
-    dom.classroomResults.append(
-      crearMensajeVacio("No hay recursos disponibles para la sección seleccionada."),
-    );
-  }
-}
-
-function renderBloqueClassroom(curso, seccion) {
-  const coincidencias = state.classroomData.filter((fila) => coincideCursoSeccion(fila, curso, seccion));
-  dom.classroomResults.textContent = "";
+function renderMateriasCurso(curso, seccion) {
+  const coincidencias = state.materiasData.filter((fila) => coincideCursoSeccion(fila, curso, seccion));
+  dom.materiasResults.textContent = "";
 
   if (!coincidencias.length) {
-    dom.classroomResults.append(
-      crearMensajeVacio("No hay aulas disponibles para este curso."),
-    );
+    dom.materiasResults.append(crearMensajeVacio("No hay materias disponibles para este curso."));
     return 0;
   }
 
   const fragment = document.createDocumentFragment();
+
   for (const fila of coincidencias) {
-    const url = construirUrlClassroom(fila.linkClassroom, fila.codigoClassroom);
+    const urlClassroom = construirUrlClassroom(fila.linkClassroom, fila.codigoClassroom);
+    const urlContinuidad = construirEnlaceSeguro(fila.linkContinuidad);
     const card = crearCardMateria({
       materia: fila.materia,
       curso: fila.curso,
       seccion: fila.seccion,
-      url,
-      actionLabel: "Abrir Classroom",
-      emptyActionLabel: "Sin enlace disponible",
-      iconClass: "fa-solid fa-chalkboard-user",
+      urlClassroom,
+      urlContinuidad,
     });
     fragment.append(card);
   }
 
-  dom.classroomResults.append(fragment);
+  dom.materiasResults.append(fragment);
   return coincidencias.length;
 }
 
-function renderBloqueContinuidad(curso, seccion) {
-  const coincidencias = state.continuidadData.filter((fila) => coincideCursoSeccion(fila, curso, seccion));
-  dom.continuidadResults.textContent = "";
-
-  if (!coincidencias.length) {
-    dom.continuidadResults.append(
-      crearMensajeVacio("No hay carpetas de continuidad disponibles para este curso."),
-    );
-    return 0;
-  }
-
-  const fragment = document.createDocumentFragment();
-  for (const fila of coincidencias) {
-    const url = construirEnlaceSeguro(fila.linkDrive);
-    const card = crearCardMateria({
-      materia: fila.materia,
-      curso: fila.curso,
-      seccion: fila.seccion,
-      url,
-      actionLabel: "Abrir carpeta",
-      emptyActionLabel: "Sin enlace disponible",
-      iconClass: "fa-solid fa-folder-open",
-    });
-    fragment.append(card);
-  }
-
-  dom.continuidadResults.append(fragment);
-  return coincidencias.length;
-}
-
-function crearCardMateria({
-  materia,
-  curso,
-  seccion,
-  url,
-  actionLabel,
-  emptyActionLabel,
-  iconClass,
-}) {
+function crearCardMateria({ materia, curso, seccion, urlClassroom, urlContinuidad }) {
   const card = document.createElement("article");
   card.className = "card-item";
 
@@ -405,10 +335,36 @@ function crearCardMateria({
 
   const meta = document.createElement("p");
   meta.className = "card-meta";
-  meta.textContent = `${curso || "Curso no indicado"} · ${seccion || "Sección no indicada"}`;
+  meta.textContent = `${curso || "Curso no indicado"} · ${seccion || "Seccion no indicada"}`;
 
+  const actions = document.createElement("div");
+  actions.className = "card-actions";
+  actions.append(
+    crearAccionMateria({
+      url: urlClassroom,
+      label: "Abrir Classroom",
+      emptyLabel: "Sin Classroom",
+      iconClass: "fa-solid fa-chalkboard-user",
+    }),
+  );
+  actions.append(
+    crearAccionMateria({
+      url: urlContinuidad,
+      label: "Abrir continuidad",
+      emptyLabel: "Sin continuidad",
+      iconClass: "fa-solid fa-folder-open",
+      tone: "secondary",
+    }),
+  );
+
+  card.append(title, meta, actions);
+  return card;
+}
+
+function crearAccionMateria({ url, label, emptyLabel, iconClass, tone = "" }) {
   const action = document.createElement(url ? "a" : "span");
-  action.className = `card-action${url ? "" : " disabled"}`;
+  action.className = `card-action${tone ? ` ${tone}` : ""}${url ? "" : " disabled"}`;
+
   if (url) {
     action.href = url;
     action.target = "_blank";
@@ -417,11 +373,8 @@ function crearCardMateria({
 
   const icon = document.createElement("i");
   icon.className = iconClass;
-  const text = document.createTextNode(url ? actionLabel : emptyActionLabel);
-  action.append(icon, text);
-
-  card.append(title, meta, action);
-  return card;
+  action.append(icon, document.createTextNode(url ? label : emptyLabel));
+  return action;
 }
 
 function crearMensajeVacio(mensaje) {
@@ -444,7 +397,6 @@ function construirUrlClassroom(linkClassroom, codigoClassroom) {
     return linkDirecto;
   }
 
-  // Fallback solicitado: si falta enlace directo, construir URL con código.
   const codigo = limpiarTexto(codigoClassroom);
   if (!codigo) {
     return "";
@@ -480,7 +432,7 @@ function inicializarBuscadorCatalogo() {
   const ejecutarBusqueda = () => {
     const termino = dom.catalogSearchInput.value.trim();
     if (!termino) {
-      dom.catalogSearchHint.textContent = "Escribí una palabra clave para explorar el catálogo.";
+      dom.catalogSearchHint.textContent = "Escribi una palabra clave para explorar el catalogo.";
       dom.catalogResults.textContent = "";
       return;
     }
@@ -512,12 +464,10 @@ function buscarEnCatalogo(termino) {
 
 function renderResultadosCatalogo(resultados, termino) {
   dom.catalogResults.textContent = "";
-  dom.catalogSearchHint.textContent = `Búsqueda: "${termino}" (${resultados.length} resultados)`;
+  dom.catalogSearchHint.textContent = `Busqueda: "${termino}" (${resultados.length} resultados)`;
 
   if (!resultados.length) {
-    dom.catalogResults.append(
-      crearMensajeVacio("No encontramos coincidencias. Probá con otro término."),
-    );
+    dom.catalogResults.append(crearMensajeVacio("No encontramos coincidencias. Proba con otro termino."));
     return;
   }
 
@@ -528,15 +478,15 @@ function renderResultadosCatalogo(resultados, termino) {
     card.className = "card-item";
 
     const title = document.createElement("h5");
-    title.textContent = item.titulo || "Título sin definir";
+    title.textContent = item.titulo || "Titulo sin definir";
 
     const meta = document.createElement("p");
     meta.className = "card-meta";
-    meta.textContent = `${item.autor || "Autor no informado"} · ${item.categoria || "Categoría general"}`;
+    meta.textContent = `${item.autor || "Autor no informado"} · ${item.categoria || "Categoria general"}`;
 
     const description = document.createElement("p");
     description.className = "card-meta";
-    description.textContent = item.descripcion || "Sin descripción disponible.";
+    description.textContent = item.descripcion || "Sin descripcion disponible.";
 
     card.append(title, meta, description);
 
@@ -562,20 +512,14 @@ function renderResultadosCatalogo(resultados, termino) {
 }
 
 function mostrarEstadoVacio() {
-  dom.selectedCourseTitle.textContent = "Seleccioná un curso para ver sus aulas y materiales";
+  dom.selectedCourseTitle.textContent = "Selecciona un curso para ver sus aulas y materiales";
   dom.selectedCourseCount.textContent =
-    "Cuando elijas una combinación de curso y sección, aparecerán los resultados aquí.";
+    "Cuando elijas una combinacion de curso y seccion, apareceran los resultados aqui.";
 }
 
-function restaurarBloquesIniciales() {
-  dom.classroomBlock.hidden = false;
-  dom.continuidadBlock.hidden = false;
-
-  dom.classroomResults.textContent = "";
-  dom.classroomResults.append(crearMensajeVacio(INITIAL_CLASSROOM_MESSAGE));
-
-  dom.continuidadResults.textContent = "";
-  dom.continuidadResults.append(crearMensajeVacio(INITIAL_CONTINUIDAD_MESSAGE));
+function restaurarBloqueInicial() {
+  dom.materiasResults.textContent = "";
+  dom.materiasResults.append(crearMensajeVacio(INITIAL_MATERIAS_MESSAGE));
 }
 
 function mostrarErrorCarga(mensaje) {
@@ -661,10 +605,7 @@ function cacheDom() {
   dom.resultsSection = document.getElementById("resultados-curso");
   dom.selectedCourseTitle = document.getElementById("selected-course-title");
   dom.selectedCourseCount = document.getElementById("selected-course-count");
-  dom.classroomBlock = document.getElementById("classroom-block");
-  dom.continuidadBlock = document.getElementById("continuidad-block");
-  dom.classroomResults = document.getElementById("classroom-results");
-  dom.continuidadResults = document.getElementById("continuidad-results");
+  dom.materiasResults = document.getElementById("materias-results");
 
   dom.linkBibliotecaNacional = document.getElementById("link-biblioteca-nacional");
   dom.linkBibliotecaMaestro = document.getElementById("link-biblioteca-maestro");

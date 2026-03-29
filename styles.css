@@ -373,7 +373,7 @@ a {
 .results-grid {
   margin-top: 1rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -414,6 +414,12 @@ a {
   font-size: 0.95rem;
 }
 
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .card-action {
   display: inline-flex;
   align-items: center;
@@ -428,9 +434,20 @@ a {
   padding: 0.5rem 0.85rem;
 }
 
+.card-action.secondary {
+  border-color: #7ca6a8;
+  background: #edf7f7;
+  color: #265e62;
+}
+
 .card-action:hover,
 .card-action:focus-visible {
   background: #e0f0ff;
+}
+
+.card-action.secondary:hover,
+.card-action.secondary:focus-visible {
+  background: #dff1f1;
 }
 
 .card-action.disabled {
