@@ -232,19 +232,7 @@ function renderBotonesCursos(cursos) {
     texto.textContent = `${item.curso} ${item.seccion}`;
 
     button.append(icon, texto);
-    button.addEventListener("click", () => {
-      const yaSeleccionado =
-        state.selected &&
-        state.selected.curso === item.curso &&
-        state.selected.seccion === item.seccion;
-
-      if (yaSeleccionado) {
-        limpiarSeleccionCurso();
-        return;
-      }
-
-      seleccionarCursoSeccion(item.curso, item.seccion);
-    });
+    button.addEventListener("click", () => seleccionarCursoSeccion(item.curso, item.seccion));
     fragment.append(button);
   }
 
@@ -265,37 +253,15 @@ function seleccionarCursoSeccion(curso, seccion) {
     dom.selectedCourseTitle.textContent = `Curso seleccionado: ${curso} ${seccion}`;
     dom.selectedCourseCount.textContent = `Resultados: ${totalMaterias} materias para este curso.`;
     dom.resultsSection.classList.remove("is-updating");
+    dom.resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 120);
 }
 
 function aplicarFiltroSeccionSeleccionada(curso, seccion) {
-  dom.coursesContainer.classList.add("focused");
-  dom.resetSelection.hidden = false;
-
   document.querySelectorAll(".course-btn").forEach((button) => {
     const activo = button.dataset.curso === curso && button.dataset.seccion === seccion;
     button.classList.toggle("active", activo);
-    button.hidden = !activo;
   });
-}
-
-function limpiarSeleccionCurso() {
-  state.selected = null;
-
-  if (state.updateTimer) {
-    clearTimeout(state.updateTimer);
-  }
-
-  dom.coursesContainer.classList.remove("focused");
-  dom.resetSelection.hidden = true;
-
-  document.querySelectorAll(".course-btn").forEach((button) => {
-    button.classList.remove("active");
-    button.hidden = false;
-  });
-
-  restaurarBloqueInicial();
-  mostrarEstadoVacio();
 }
 
 function renderMateriasCurso(curso, seccion) {
@@ -585,8 +551,6 @@ function inicializarLayoutEstatico() {
       dom.menuToggle.setAttribute("aria-expanded", "false");
     });
   });
-
-  dom.resetSelection.addEventListener("click", limpiarSeleccionCurso);
 }
 
 function cacheDom() {
@@ -599,7 +563,6 @@ function cacheDom() {
   dom.catalogResults = document.getElementById("catalog-results");
 
   dom.dataStatus = document.getElementById("data-status");
-  dom.resetSelection = document.getElementById("reset-selection");
   dom.coursesContainer = document.getElementById("courses-container");
 
   dom.resultsSection = document.getElementById("resultados-curso");
