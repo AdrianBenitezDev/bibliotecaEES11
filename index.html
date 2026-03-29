@@ -18,6 +18,7 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
   >
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -33,7 +34,7 @@
       </button>
 
       <nav class="main-nav" id="main-nav">
-        <a href="#inicio">Inicio</a>
+        <a href="#inicio-panel" class="view-trigger" data-view="inicio">Inicio</a>
         <a href="#cursos" class="view-trigger" data-view="cursos">Cursos</a>
         <a href="#biblioteca" class="view-trigger" data-view="biblioteca">Biblioteca</a>
         <a href="#buscador" class="view-trigger" data-view="buscador">Buscador</a>
@@ -52,16 +53,30 @@
           pedagogica y recursos bibliograficos para toda la comunidad escolar.
         </p>
         <div class="hero-actions">
+          <a href="#inicio-panel" class="btn btn-secondary view-trigger" data-view="inicio">Inicio</a>
           <a href="#cursos" class="btn btn-primary view-trigger" data-view="cursos">Ver cursos</a>
           <a href="#biblioteca" class="btn btn-secondary view-trigger" data-view="biblioteca">Ver biblioteca</a>
         </div>
       </div>
     </section>
 
+    <section class="section container" id="inicio-panel" data-view-panel="inicio">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-handshake-angle"></i> Inicio</h2>
+      </div>
+      <article class="welcome-card">
+        <h3>Bienvenidos a la Biblioteca Escolar</h3>
+        <p>
+          Este espacio centraliza el acceso a cursos, aulas virtuales y recursos de continuidad
+          pedagogica para estudiantes, docentes y familias de la Escuela Secundaria N 11.
+        </p>
+      </article>
+    </section>
+
     <section class="section container" id="buscador" data-view-panel="buscador">
       <div class="section-header">
         <h2><i class="fa-solid fa-magnifying-glass"></i> Buscador de catalogo</h2>
-        <p>Busca por titulo, autor, categoria o descripcion dentro del archivo local <code>catalogo.js</code>.</p>
+        <p>Busca por titulo, autor, categoria o descripcion dentro del catalogo de la biblioteca escolar</p>
       </div>
 
       <div class="search-panel">
@@ -173,7 +188,7 @@
           <div class="contact-icon">
             <i class="fa-solid fa-address-card"></i>
           </div>
-          <h5>Biblotecara</h5>
+          <h5>Bibliotecaria</h5>
           <p class="card-meta">Herrero Elizabeth</p>
         </article>
       </div>
@@ -188,7 +203,7 @@
       </div>
       <div>
         <h5>Enlaces rapidos</h5>
-        <a href="#inicio">Inicio</a>
+        <a href="#inicio-panel" class="view-trigger" data-view="inicio">Inicio</a>
         <a href="#cursos" class="view-trigger" data-view="cursos">Cursos</a>
         <a href="#buscador" class="view-trigger" data-view="buscador">Buscador</a>
         <a href="#contacto" class="view-trigger" data-view="contacto">Contacto</a>

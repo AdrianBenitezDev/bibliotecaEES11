@@ -236,7 +236,8 @@ a {
 
 .search-panel,
 .results-block,
-.library-card {
+.library-card,
+.welcome-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -245,6 +246,22 @@ a {
 
 .search-panel {
   padding: 1rem;
+}
+
+.welcome-card {
+  padding: 1.15rem;
+}
+
+.welcome-card h3 {
+  margin: 0;
+  font-family: "Merriweather", serif;
+  color: var(--primary-strong);
+}
+
+.welcome-card p {
+  margin: 0.65rem 0 0;
+  color: var(--text-muted);
+  max-width: 72ch;
 }
 
 .search-controls {

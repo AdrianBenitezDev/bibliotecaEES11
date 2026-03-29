@@ -331,7 +331,7 @@ function crearCardMateria({ materia, curso, seccion, urlClassroom, urlContinuida
   card.className = "card-item";
 
   const title = document.createElement("h5");
-  title.textContent = materia || "Materia sin nombre";
+  title.textContent = capitalizarPrimeraLetra(materia) || "Materia sin nombre";
 
   const meta = document.createElement("p");
   meta.className = "card-meta";
@@ -638,4 +638,12 @@ function normalizarClave(texto) {
 
 function normalizarBusqueda(texto) {
   return normalizarClave(texto).replace(/\s+/g, " ");
+}
+
+function capitalizarPrimeraLetra(texto) {
+  const limpio = limpiarTexto(texto);
+  if (!limpio) {
+    return "";
+  }
+  return limpio.charAt(0).toLocaleUpperCase("es-AR") + limpio.slice(1);
 }
